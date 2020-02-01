@@ -36,6 +36,8 @@ public static class BodyHelper002
         name = name.ToLower();
         if (name.Contains("mixamorig"))
             return BodyPartGroup.None;
+        if (name == "gettingahead")
+            return BodyPartGroup.None;
 
         if (name.Contains("butt"))
             return BodyPartGroup.Hips;
@@ -48,7 +50,7 @@ public static class BodyHelper002
 
         if (name.Contains("thigh"))
             return BodyPartGroup.LegUpper;
-        if (name.Contains("shin"))
+        if (name.Contains("shin") || name.Contains("leg"))
             return BodyPartGroup.LegLower;
         if (name.Contains("right_right_foot") || name.Contains("left_left_foot"))
             return BodyPartGroup.Foot;
@@ -58,6 +60,8 @@ public static class BodyHelper002
             return BodyPartGroup.ArmLower;
 		if (name.Contains("hand"))
             return BodyPartGroup.Hand;
+        if (name.Contains("foot"))
+            return BodyPartGroup.Foot;
 
         return BodyPartGroup.None;
     }
@@ -66,6 +70,9 @@ public static class BodyHelper002
         name = name.ToLower();
         if (name.Contains("mixamorig"))
             return MuscleGroup.None;
+        if (name == "gettingahead")
+            return MuscleGroup.None;
+
         if (name.Contains("butt"))
             return MuscleGroup.Hips;
         if (name.Contains("lower_waist")
@@ -86,6 +93,11 @@ public static class BodyHelper002
             return MuscleGroup.ArmLower;
 		if (name.Contains("hand"))
             return MuscleGroup.Hand;
+
+        if (name.Contains("leg"))
+            return MuscleGroup.LegLower;
+        if (name.Contains("foot"))
+            return MuscleGroup.Foot;
 
         return MuscleGroup.None;
     }

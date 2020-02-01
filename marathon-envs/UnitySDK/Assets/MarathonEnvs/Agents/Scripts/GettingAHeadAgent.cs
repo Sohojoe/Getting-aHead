@@ -1,85 +1,144 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using MLAgents;
+using System.Linq;
+using static BodyHelper002;
 
-public class GettingAHeadAgent : MarathonAgent
+public class GettingAHeadAgent : Agent, IOnTerrainCollision
 {
-    public override void AgentReset()
-    {
-        base.AgentReset();
+	BodyManager002 _bodyManager;
 
-        // set to true this to show monitor while training
-        Monitor.SetActive(true);
+	// override public void CollectObservations()
+	// {
+	// 	// AddVectorObs(ObsPhase);
+	// 	foreach (var bodyPart in BodyParts)
+	// 	{
+	// 		bodyPart.UpdateObservations();
+	// 		AddVectorObs(bodyPart.ObsLocalPosition);
+	// 		AddVectorObs(bodyPart.ObsRotation);
+	// 		AddVectorObs(bodyPart.ObsRotationVelocity);
+	// 		AddVectorObs(bodyPart.ObsVelocity);
+	// 	}
+	// 	foreach (var muscle in Muscles)
+	// 	{
+	// 		muscle.UpdateObservations();
+	// 		if (muscle.ConfigurableJoint.angularXMotion != ConfigurableJointMotion.Locked)
+	// 			AddVectorObs(muscle.TargetNormalizedRotationX);
+	// 		if (muscle.ConfigurableJoint.angularYMotion != ConfigurableJointMotion.Locked)
+	// 			AddVectorObs(muscle.TargetNormalizedRotationY);
+	// 		if (muscle.ConfigurableJoint.angularZMotion != ConfigurableJointMotion.Locked)
+	// 			AddVectorObs(muscle.TargetNormalizedRotationZ);
+	// 	}
 
-        StepRewardFunction = StepRewardWalker106;
-        TerminateFunction = TerminateOnNonFootHitTerrain;
-        ObservationsFunction = ObservationsDefault;
+	// 	// AddVectorObs(ObsCenterOfMass);
+	// 	// AddVectorObs(ObsVelocity);
+	// 	AddVectorObs(SensorIsInTouch);
+	// }
+	override public void CollectObservations()
+	{
+		Vector3 normalizedVelocity = _bodyManager.GetNormalizedVelocity();
+        var pelvis = _bodyManager.GetFirstBodyPart(BodyPartGroup.Torso);
+        var shoulders = _bodyManager.GetFirstBodyPart(BodyPartGroup.Torso);
 
-        BodyParts["pelvis"] = GetComponentsInChildren<Rigidbody>().FirstOrDefault(x => x.name == "torso");
-        BodyParts["left_thigh"] = GetComponentsInChildren<Rigidbody>().FirstOrDefault(x => x.name == "left_thigh");
-        BodyParts["right_thigh"] = GetComponentsInChildren<Rigidbody>().FirstOrDefault(x => x.name == "right_thigh");
-        BodyParts["right_foot"] = GetComponentsInChildren<Rigidbody>().FirstOrDefault(x => x.name == "right_foot");
-        BodyParts["left_foot"] = GetComponentsInChildren<Rigidbody>().FirstOrDefault(x => x.name == "left_foot");
-        SetupBodyParts();
-    }
-
-
-    public override void AgentOnDone()
-    {
-    }
-
-    void ObservationsDefault()
-    {
-        if (ShowMonitor)
-        {
-        }
-
-        var pelvis = BodyParts["pelvis"];
-        Vector3 normalizedVelocity = this.GetNormalizedVelocity(pelvis.velocity);
         AddVectorObs(normalizedVelocity);
-        AddVectorObs(pelvis.transform.forward); // gyroscope 
-        AddVectorObs(pelvis.transform.up);
+		AddVectorObs(pelvis.Rigidbody.transform.forward); // gyroscope 
+		AddVectorObs(pelvis.Rigidbody.transform.up);
 
-        AddVectorObs(SensorIsInTouch);
-        JointRotations.ForEach(x => AddVectorObs(x));
-        AddVectorObs(JointVelocity);
-        AddVectorObs(new []{
-            this.GetNormalizedPosition(BodyParts["left_foot"].transform.position).y,
-            this.GetNormalizedPosition(BodyParts["right_foot"].transform.position).y
-        });
-    }
+		AddVectorObs(_bodyManager.GetSensorIsInTouch());
+		//JointRotations.ForEach(x => AddVectorObs(x));
+		AddVectorObs(_bodyManager.GetMusclesObservations());
+        //AddVectorObs(JointVelocity);
+        // ?? AddVectorObs(_bodyManager.GetMusclesObservations());
+        //AddVectorObs(new[]{
+        //	this.GetNormalizedPosition(BodyParts["left_foot"].transform.position).y,
+        //	this.GetNormalizedPosition(BodyParts["right_foot"].transform.position).y
+        //});
+        AddVectorObs(_bodyManager.GetSensorZPositions());
+        //AddVectorObs(_bodyManager.GetSensorObservations());
 
-    float StepRewardWalker106()
-    {
-        float heightPenality = 1f-GetHeightPenality(1.1f);
-        heightPenality = Mathf.Clamp(heightPenality, 0f, 1f);
-        float uprightBonus = GetDirectionBonus("pelvis", Vector3.forward, 1f);
-        uprightBonus = Mathf.Clamp(uprightBonus, 0f, 1f);
-        float velocity = Mathf.Clamp(GetNormalizedVelocity("pelvis").x, 0f, 1f);
-        float effort = 1f - GetEffortNormalized();
+        //      AddVectorObs(pelvis.Rigidbody.transform.forward); // gyroscope 
+        //      AddVectorObs(pelvis.Rigidbody.transform.up);
 
-        if (ShowMonitor)
-        {
-            var hist = new[] {velocity, uprightBonus, heightPenality, effort}.ToList();
-            Monitor.Log("rewardHist", hist.ToArray(), displayType: Monitor.DisplayType.INDEPENDENT);
-        }
+        //      AddVectorObs(shoulders.Rigidbody.transform.forward); // gyroscope 
+        //      AddVectorObs(shoulders.Rigidbody.transform.up);
 
-        heightPenality *= 0.05f;
-        uprightBonus *= 0.05f;
-        velocity *= 0.4f;
-        if (velocity >= .4f)
-            effort *= 0.4f;
-        else
-            effort *= velocity;
+        //AddVectorObs(_bodyManager.GetSensorIsInTouch());
+        //AddVectorObs(_bodyManager.GetBodyPartsObservations());
+        //AddVectorObs(_bodyManager.GetMusclesObservations());
+        //AddVectorObs(_bodyManager.GetSensorYPositions());
+        //AddVectorObs(_bodyManager.GetSensorZPositions());
 
-        var reward = velocity
-                     + uprightBonus
-                     + heightPenality
-                     + effort;
+        _bodyManager.OnCollectObservationsHandleDebug(GetInfo());
+	}
 
-        return reward;
-    }
+	public override void AgentAction(float[] vectorAction, string textAction)
+	{
+		// apply actions to body
+		_bodyManager.OnAgentAction(vectorAction, textAction);
+
+		// manage reward
+        float velocity = Mathf.Clamp(_bodyManager.GetNormalizedVelocity().x, 0f, 1f);
+		var actionDifference = _bodyManager.GetActionDifference();
+		var actionsAbsolute = vectorAction.Select(x=>Mathf.Abs(x)).ToList();
+		var actionsAtLimit = actionsAbsolute.Select(x=> x>=1f ? 1f : 0f).ToList();
+		float actionaAtLimitCount = actionsAtLimit.Sum();
+        float notAtLimitBonus = 1f - (actionaAtLimitCount / (float) actionsAbsolute.Count);
+        float reducedPowerBonus = 1f - actionsAbsolute.Average();
+
+		// velocity *= 0.85f;
+		// reducedPowerBonus *=0f;
+		// notAtLimitBonus *=.1f;
+		// actionDifference *=.05f;
+        // var reward = velocity
+		// 				+ notAtLimitBonus
+		// 				+ reducedPowerBonus
+		// 				+ actionDifference;		
+        var pelvis = _bodyManager.GetFirstBodyPart(BodyPartGroup.Hips);
+		if (pelvis.Transform.position.y<0){
+			Done();
+		}
+		
+
+        var reward = velocity;
+
+		AddReward(reward);
+		_bodyManager.SetDebugFrameReward(reward);
+	}
+
+
+	public override void AgentReset()
+	{
+		if (_bodyManager == null)
+			_bodyManager = GetComponent<BodyManager002>();
+		_bodyManager.OnAgentReset();
+	}
+	public virtual void OnTerrainCollision(GameObject other, GameObject terrain)
+	{
+		// if (string.Compare(terrain.name, "Terrain", true) != 0)
+		if (terrain.GetComponent<Terrain>() == null)
+			return;
+		// if (!_styleAnimator.AnimationStepsReady)
+		// 	return;
+		var bodyPart = _bodyManager.BodyParts.FirstOrDefault(x=>x.Transform.gameObject == other);
+		if (bodyPart == null)
+			return;
+		switch (bodyPart.Group)
+		{
+			case BodyHelper002.BodyPartGroup.None:
+			case BodyHelper002.BodyPartGroup.Foot:
+			// case BodyHelper002.BodyPartGroup.LegUpper:
+			case BodyHelper002.BodyPartGroup.LegLower:
+			case BodyHelper002.BodyPartGroup.Hand:
+			// case BodyHelper002.BodyPartGroup.ArmLower:
+			// case BodyHelper002.BodyPartGroup.ArmUpper:
+				break;
+			default:
+				// AddReward(-100f);
+				if (!IsDone()){
+					Done();
+				}
+				break;
+		}
+	}
 }

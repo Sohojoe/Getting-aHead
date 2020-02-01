@@ -173,11 +173,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GettingAHead
       objectReference: {fileID: 0}
-    - target: {fileID: 5269858300215634233, guid: 622069e9451804647b6239882948d292,
-        type: 3}
-      propertyPath: MusclePowers.Array.size
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 8914497934124425080, guid: 622069e9451804647b6239882948d292,
         type: 3}
       propertyPath: m_LocalPosition.x
