@@ -119,6 +119,13 @@ namespace MLAgents
                 foreach (var item in GetComponentsInChildren<Rigidbody>())
                     item.constraints = RigidbodyConstraints.FreezePositionZ;
             }
+            if (true)
+            {
+                foreach (var item in GetComponentsInChildren<Rigidbody>())
+                {
+                    item.constraints = RigidbodyConstraints.FreezeAll;
+                }
+            }
 
             if (this.gameObject.layer != 0)
             {
