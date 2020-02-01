@@ -1296,7 +1296,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e788eb6109bb04aa1bd822f9fc98f4bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MusclePowers: []
+  MusclePowers:
+  - Muscle: right_thigh
+    PowerVector: {x: 100, y: 0, z: 0}
+  - Muscle: right_leg
+    PowerVector: {x: 50, y: 0, z: 0}
+  - Muscle: right_foot
+    PowerVector: {x: 20, y: 0, z: 0}
+  - Muscle: left_thigh
+    PowerVector: {x: 100, y: 0, z: 0}
+  - Muscle: left_leg
+    PowerVector: {x: 50, y: 0, z: 0}
+  - Muscle: left_foot
+    PowerVector: {x: 20, y: 0, z: 0}
   MotorScale: 1
 --- !u!114 &3991153564711649776
 MonoBehaviour:
