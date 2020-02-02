@@ -47,12 +47,12 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
 		//AddVectorObs(_bodyManager.GetSensorIsInTouch());
 		var sensorsInTouch = _bodyManager.GetSensorIsInTouch();
-		sensorsInTouch = new [] { sensorsInTouch[0], sensorsInTouch[2] }.ToList();
+		//sensorsInTouch = new [] { sensorsInTouch[0], sensorsInTouch[2] }.ToList();
 		AddVectorObs(sensorsInTouch);
 
 		// JointRotations.ForEach(x => AddVectorObs(x)); = 6*4 = 24
 		var jointRotations = _bodyManager.GetMusclesRotations();
-		AddVectorObs(jointRotations);
+		jointRotations.ForEach(x => AddVectorObs(x));
 
 		// AddVectorObs(JointVelocity); = 6
 		var jointVelocity = _bodyManager.GetMusclesObservations();
@@ -60,7 +60,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
 		// AddVectorObs.  = 2
 		var feetHeight = _bodyManager.GetSensorZPositions();
-		feetHeight = new[] { feetHeight[0], feetHeight[2] }.ToList();
+		//feetHeight = new[] { feetHeight[0], feetHeight[2] }.ToList();
 		AddVectorObs(feetHeight);
 
         _bodyManager.OnCollectObservationsHandleDebug(GetInfo());

@@ -119,7 +119,7 @@ namespace MLAgents
                 foreach (var item in GetComponentsInChildren<Rigidbody>())
                     item.constraints = RigidbodyConstraints.FreezePositionZ;
             }
-            if (true)
+            if (false)
             {
                 foreach (var item in GetComponentsInChildren<Rigidbody>())
                 {
