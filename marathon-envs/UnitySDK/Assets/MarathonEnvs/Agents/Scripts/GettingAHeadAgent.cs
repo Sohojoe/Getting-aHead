@@ -45,29 +45,23 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		AddVectorObs(pelvis.Rigidbody.transform.forward); // gyroscope 
 		AddVectorObs(pelvis.Rigidbody.transform.up);
 
-		AddVectorObs(_bodyManager.GetSensorIsInTouch());
-		//JointRotations.ForEach(x => AddVectorObs(x));
-		AddVectorObs(_bodyManager.GetMusclesObservations());
-        //AddVectorObs(JointVelocity);
-        // ?? AddVectorObs(_bodyManager.GetMusclesObservations());
-        //AddVectorObs(new[]{
-        //	this.GetNormalizedPosition(BodyParts["left_foot"].transform.position).y,
-        //	this.GetNormalizedPosition(BodyParts["right_foot"].transform.position).y
-        //});
-        AddVectorObs(_bodyManager.GetSensorZPositions());
-        //AddVectorObs(_bodyManager.GetSensorObservations());
+		//AddVectorObs(_bodyManager.GetSensorIsInTouch());
+		var sensorsInTouch = _bodyManager.GetSensorIsInTouch();
+		sensorsInTouch = new [] { sensorsInTouch[0], sensorsInTouch[2] }.ToList();
+		AddVectorObs(sensorsInTouch);
 
-        //      AddVectorObs(pelvis.Rigidbody.transform.forward); // gyroscope 
-        //      AddVectorObs(pelvis.Rigidbody.transform.up);
+		// JointRotations.ForEach(x => AddVectorObs(x)); = 6*4 = 24
+		var jointRotations = _bodyManager.GetMusclesRotations();
+		AddVectorObs(jointRotations);
 
-        //      AddVectorObs(shoulders.Rigidbody.transform.forward); // gyroscope 
-        //      AddVectorObs(shoulders.Rigidbody.transform.up);
+		// AddVectorObs(JointVelocity); = 6
+		var jointVelocity = _bodyManager.GetMusclesObservations();
+		AddVectorObs(jointVelocity);
 
-        //AddVectorObs(_bodyManager.GetSensorIsInTouch());
-        //AddVectorObs(_bodyManager.GetBodyPartsObservations());
-        //AddVectorObs(_bodyManager.GetMusclesObservations());
-        //AddVectorObs(_bodyManager.GetSensorYPositions());
-        //AddVectorObs(_bodyManager.GetSensorZPositions());
+		// AddVectorObs.  = 2
+		var feetHeight = _bodyManager.GetSensorZPositions();
+		feetHeight = new[] { feetHeight[0], feetHeight[2] }.ToList();
+		AddVectorObs(feetHeight);
 
         _bodyManager.OnCollectObservationsHandleDebug(GetInfo());
 	}
@@ -94,7 +88,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		// 				+ notAtLimitBonus
 		// 				+ reducedPowerBonus
 		// 				+ actionDifference;		
-        var pelvis = _bodyManager.GetFirstBodyPart(BodyPartGroup.Hips);
+        var pelvis = _bodyManager.GetFirstBodyPart(BodyPartGroup.Torso);
 		if (pelvis.Transform.position.y<0){
 			Done();
 		}

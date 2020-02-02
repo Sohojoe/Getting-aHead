@@ -446,7 +446,35 @@ public class BodyManager002 : MonoBehaviour, IOnSensorCollision
 		}
         return vectorObservation;
     }
-    public List<float> GetMusclesObservations()
+	public List<float> GetBodyPartsRotations()
+	{
+		List<float> vectorObservation = new List<float>();
+		foreach (var bodyPart in BodyParts)
+		{
+			bodyPart.UpdateObservations();
+			// _agent.AddVectorObs(bodyPart.ObsRotation);
+			vectorObservation.Add(bodyPart.ObsRotation.x);
+			vectorObservation.Add(bodyPart.ObsRotation.y);
+			vectorObservation.Add(bodyPart.ObsRotation.z);
+			vectorObservation.Add(bodyPart.ObsRotation.w);
+		}
+		return vectorObservation;
+	}
+	public List<float> GetMusclesRotations()
+	{
+		List<float> vectorObservation = new List<float>();
+		foreach (var muscle in Muscles)
+		{
+			muscle.UpdateObservations();
+			// _agent.AddVectorObs(bodyPart.ObsRotation);
+			vectorObservation.Add(muscle.ObsRotation.x);
+			vectorObservation.Add(muscle.ObsRotation.y);
+			vectorObservation.Add(muscle.ObsRotation.z);
+			vectorObservation.Add(muscle.ObsRotation.w);
+		}
+		return vectorObservation;
+	}
+	public List<float> GetMusclesObservations()
     {
         List<float> vectorObservation = new List<float>();
 		foreach (var muscle in Muscles)
