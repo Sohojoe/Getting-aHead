@@ -9,32 +9,14 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 {
 	BodyManager002 _bodyManager;
 
-	// override public void CollectObservations()
-	// {
-	// 	// AddVectorObs(ObsPhase);
-	// 	foreach (var bodyPart in BodyParts)
-	// 	{
-	// 		bodyPart.UpdateObservations();
-	// 		AddVectorObs(bodyPart.ObsLocalPosition);
-	// 		AddVectorObs(bodyPart.ObsRotation);
-	// 		AddVectorObs(bodyPart.ObsRotationVelocity);
-	// 		AddVectorObs(bodyPart.ObsVelocity);
-	// 	}
-	// 	foreach (var muscle in Muscles)
-	// 	{
-	// 		muscle.UpdateObservations();
-	// 		if (muscle.ConfigurableJoint.angularXMotion != ConfigurableJointMotion.Locked)
-	// 			AddVectorObs(muscle.TargetNormalizedRotationX);
-	// 		if (muscle.ConfigurableJoint.angularYMotion != ConfigurableJointMotion.Locked)
-	// 			AddVectorObs(muscle.TargetNormalizedRotationY);
-	// 		if (muscle.ConfigurableJoint.angularZMotion != ConfigurableJointMotion.Locked)
-	// 			AddVectorObs(muscle.TargetNormalizedRotationZ);
-	// 	}
+	public bool MoveRight = true;
+	public bool MoveLeft;
+	public bool Jump;
+	public int StepsUntilChange;
 
-	// 	// AddVectorObs(ObsCenterOfMass);
-	// 	// AddVectorObs(ObsVelocity);
-	// 	AddVectorObs(SensorIsInTouch);
-	// }
+
+	bool _isTrainingMode = false;
+
 	override public void CollectObservations()
 	{
 		Vector3 normalizedVelocity = _bodyManager.GetNormalizedVelocity();
@@ -47,7 +29,6 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
 		//AddVectorObs(_bodyManager.GetSensorIsInTouch());
 		var sensorsInTouch = _bodyManager.GetSensorIsInTouch();
-		//sensorsInTouch = new [] { sensorsInTouch[0], sensorsInTouch[2] }.ToList();
 		AddVectorObs(sensorsInTouch);
 
 		// JointRotations.ForEach(x => AddVectorObs(x)); = 6*4 = 24
@@ -60,14 +41,19 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
 		// AddVectorObs.  = 2
 		var feetHeight = _bodyManager.GetSensorZPositions();
-		//feetHeight = new[] { feetHeight[0], feetHeight[2] }.ToList();
 		AddVectorObs(feetHeight);
+
+        AddVectorObs(MoveLeft);
+        AddVectorObs(MoveRight);
+        AddVectorObs(Jump);
 
         _bodyManager.OnCollectObservationsHandleDebug(GetInfo());
 	}
 
 	public override void AgentAction(float[] vectorAction, string textAction)
 	{
+		if (_isTrainingMode)
+			HandleControllerTraining();
 		// apply actions to body
 		_bodyManager.OnAgentAction(vectorAction, textAction);
 
@@ -79,22 +65,33 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		float actionaAtLimitCount = actionsAtLimit.Sum();
         float notAtLimitBonus = 1f - (actionaAtLimitCount / (float) actionsAbsolute.Count);
         float reducedPowerBonus = 1f - actionsAbsolute.Average();
-
-		// velocity *= 0.85f;
-		// reducedPowerBonus *=0f;
-		// notAtLimitBonus *=.1f;
-		// actionDifference *=.05f;
-        // var reward = velocity
-		// 				+ notAtLimitBonus
-		// 				+ reducedPowerBonus
-		// 				+ actionDifference;		
+	
         var pelvis = _bodyManager.GetFirstBodyPart(BodyPartGroup.Torso);
 		if (pelvis.Transform.position.y<0){
 			Done();
 		}
-		
 
-        var reward = velocity;
+		bool goalStationary = false;
+		bool goalRight = false;
+		float reward = 0f;
+		if (MoveRight && MoveLeft)
+			goalStationary = true;
+		else if (!MoveRight && !MoveLeft)
+			goalStationary = true;
+		else if (MoveRight)
+			goalRight = true;
+
+		if (goalStationary)
+		{
+			velocity = Mathf.Abs(velocity);
+			reward = 1f - velocity;
+			reward = Mathf.Clamp(reward, -1f, 1f);
+		}
+		else if (goalRight)
+			reward = velocity;
+		else
+			reward = -velocity;
+		reward = Mathf.Clamp(reward, -1f, 1f);
 
 		AddReward(reward);
 		_bodyManager.SetDebugFrameReward(reward);
@@ -104,8 +101,14 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 	public override void AgentReset()
 	{
 		if (_bodyManager == null)
+		{
 			_bodyManager = GetComponent<BodyManager002>();
+			var academy = FindObjectOfType<Academy>();
+			_isTrainingMode = academy.agentSpawner.trainingMode;
+		}
 		_bodyManager.OnAgentReset();
+		//StepsUntilChange = 0;
+		//SetAction(0);
 	}
 	public virtual void OnTerrainCollision(GameObject other, GameObject terrain)
 	{
@@ -135,4 +138,56 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 				break;
 		}
 	}
+    void HandleControllerTraining()
+    {
+		StepsUntilChange--;
+		if (StepsUntilChange > 0)
+			return;
+		var rnd = UnityEngine.Random.value;
+		bool repeateAction = false;
+		int action = AsAction();
+		if (action != 0 && rnd > .6f)
+			repeateAction = true;
+		if (!repeateAction)
+		{
+			rnd = UnityEngine.Random.value;
+			if (rnd <= .4f)
+				action = 1; // right
+			else if (rnd <= .8f)
+				action = 2; // left
+			else
+				action = 0; // stand
+			rnd = UnityEngine.Random.value;
+			if (rnd >= .75)
+				action += 3; // add jump
+		}
+		StepsUntilChange = 40 + (int)(UnityEngine.Random.value * 200);
+		SetAction(action);
+	}
+    int AsAction()
+    {
+		int action = 0;
+		if (MoveRight && MoveLeft)
+			action = 0;
+		else if (!MoveRight && !MoveLeft)
+			action = 0;
+		else if (MoveRight)
+			action = 1;
+        else
+			action = 2;
+		if (Jump)
+			action += 3;
+		return action;
+	}
+    void SetAction(int action)
+    {
+		Jump = false;
+        if (action >=3)
+        {
+			action -= 3;
+			Jump = true;
+        }
+		MoveRight = true ? action == 1 : false;
+		MoveLeft = true ? action == 2 : false;
+    }
 }
