@@ -184,3 +184,20 @@ TerrainMarathonManBrain-v0:
     beta: .0003
     # max_steps: 100e6
     max_steps: 100e4 # HACK for 100 agents
+
+Getting-aHead-v0:
+    num_epoch: 10 
+    time_horizon: 100 
+    # summary_freq: 100000
+    summary_freq: 1000 # HACK for 100 agents
+    use_recurrent: false
+    normalize: false 
+    num_layers: 2
+    hidden_units: 64
+    learning_rate: 3e-4
+    batch_size: 16
+    buffer_size: 16
+    max_steps: 20000 # HACK for 50 agents
+    beta: .003
+    # max_steps: 1.e6
+    # max_steps: 1.e4 # HACK for 100 agents    
