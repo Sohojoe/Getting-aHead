@@ -1,14 +1,48 @@
 fileFormatVersion: 2
-guid: ff6387fe0ae1e6d45a7b83511e28287c
+guid: 853bf2b032c41a440bd97af02e3967d1
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: //RootNode
-    400000: //RootNode
-    2100000: torsoMat
-    2300000: //RootNode
-    3300000: //RootNode
-    4300000: torso
+    100000: left_foot
+    100002: left_leg
+    100004: left_thigh
+    100006: right_foot
+    100008: right_leg
+    100010: right_thigh
+    100012: //RootNode
+    100014: torso
+    400000: left_foot
+    400002: left_leg
+    400004: left_thigh
+    400006: right_foot
+    400008: right_leg
+    400010: right_thigh
+    400012: //RootNode
+    400014: torso
+    2100000: MarathonMat
+    2300000: left_foot
+    2300002: left_leg
+    2300004: left_thigh
+    2300006: right_foot
+    2300008: right_leg
+    2300010: right_thigh
+    2300012: torso
+    2300014: //RootNode
+    3300000: left_foot
+    3300002: left_leg
+    3300004: left_thigh
+    3300006: right_foot
+    3300008: right_leg
+    3300010: right_thigh
+    3300012: torso
+    3300014: //RootNode
+    4300000: left_foot
+    4300002: torso
+    4300004: right_thigh
+    4300006: right_leg
+    4300008: right_foot
+    4300010: left_thigh
+    4300012: left_leg
   externalObjects: {}
   materials:
     importMaterials: 1
