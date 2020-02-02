@@ -88,7 +88,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		var jumpReward = 0f;
 		if (!anySensorInTouch)
 		{
-			jumpReward += .05f;
+			jumpReward += 1f;
 			jumpReward += footHeight;
 		}
 
