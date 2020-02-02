@@ -95,6 +95,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		if (goalStationary)
 		{
 			velocity = Mathf.Abs(velocity);
+			velocity = Mathf.Pow(velocity, 3);
 			reward = 1f - velocity;
 			reward = Mathf.Clamp(reward, -1f, 1f);
 		}
