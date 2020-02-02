@@ -81,6 +81,17 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		else if (MoveRight)
 			goalRight = true;
 
+		var sensorsInTouch = _bodyManager.GetSensorIsInTouch();
+		var anySensorInTouch = sensorsInTouch.Sum() != 0;
+		var feetHeights = _bodyManager.GetSensorZPositions();
+		var footHeight = feetHeights.Min();
+		var jumpReward = 0f;
+		if (!anySensorInTouch)
+		{
+			jumpReward += .05f;
+			jumpReward += footHeight;
+		}
+
 		if (goalStationary)
 		{
 			velocity = Mathf.Abs(velocity);
@@ -91,6 +102,11 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 			reward = velocity;
 		else
 			reward = -velocity;
+        if (Jump)
+        {
+			reward = reward * .5f;
+			reward += (jumpReward * .5f);
+        }
 		reward = Mathf.Clamp(reward, -1f, 1f);
 
 		AddReward(reward);
