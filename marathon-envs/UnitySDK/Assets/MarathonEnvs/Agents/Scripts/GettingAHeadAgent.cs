@@ -40,7 +40,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		AddVectorObs(jointVelocity);
 
 		// AddVectorObs.  = 2
-		var feetHeight = _bodyManager.GetSensorZPositions();
+		var feetHeight = _bodyManager.GetSensorYPositions();
 		AddVectorObs(feetHeight);
 
         AddVectorObs(MoveLeft);
@@ -83,7 +83,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
 		var sensorsInTouch = _bodyManager.GetSensorIsInTouch();
 		var anySensorInTouch = sensorsInTouch.Sum() != 0;
-		var feetHeights = _bodyManager.GetSensorZPositions();
+		var feetHeights = _bodyManager.GetSensorYPositions();
 		var footHeight = feetHeights.Min();
 		var jumpReward = 0f;
 		if (!anySensorInTouch)
