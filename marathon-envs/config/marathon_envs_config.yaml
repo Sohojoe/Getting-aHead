@@ -197,7 +197,7 @@ Getting-aHeadBrain-v0:
     learning_rate: 3e-4
     batch_size: 16
     buffer_size: 16
-    max_steps: 20000 # HACK for 50 agents
+    max_steps: 200000 # HACK for 50 agents
     beta: .003
     # max_steps: 1.e6
     # max_steps: 1.e4 # HACK for 100 agents    

@@ -92,11 +92,10 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 			jumpReward += footHeight;
 		}
 
-		float stationaryVelocityReward = 1f-velocity;
+		float stationaryVelocityReward = 1f-Mathf.Abs(velocity * 3);
+		stationaryVelocityReward = Mathf.Clamp(stationaryVelocityReward, 0f, 1f);
 		if (goalStationary)
 		{
-			velocity = Mathf.Abs(velocity);
-			velocity = Mathf.Pow(velocity, 3);
 			float footReward = sensorsInTouch.Average();
 			// float actionDifferenceReward = 1f-actionDifference;
 			reward = 
