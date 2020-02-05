@@ -7,6 +7,8 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
 
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -16,7 +18,11 @@ public class ProceduralCapsule : MonoBehaviour
     [ContextMenu("Generate Procedural Capsule")]
     public void GenerateProceduralCapsule()
     {
-        // GenerateMesh();
+        CreateMesh();
+        MeshFilter mf = gameObject.GetComponent<MeshFilter>();
+        Mesh mesh = mf.sharedMesh;
+        string name = gameObject.name + mesh.name;
+		SaveMesh(mesh, name, false, true);
     }
 #endif
 
@@ -31,7 +37,20 @@ public class ProceduralCapsule : MonoBehaviour
     void Start()
     {
     }
+	public static void SaveMesh (Mesh mesh, string name, bool makeNewInstance, bool optimizeMesh) {
+		string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/", name, "asset");
+		if (string.IsNullOrEmpty(path)) return;
+        
+		path = FileUtil.GetProjectRelativePath(path);
 
+		Mesh meshToSave = (makeNewInstance) ? Object.Instantiate(mesh) as Mesh : mesh;
+		
+		if (optimizeMesh)
+		     MeshUtility.Optimize(meshToSave);
+        
+		AssetDatabase.CreateAsset(meshToSave, path);
+		AssetDatabase.SaveAssets();
+	}
     public void CreateMesh()
     {
         // make segments an even number
