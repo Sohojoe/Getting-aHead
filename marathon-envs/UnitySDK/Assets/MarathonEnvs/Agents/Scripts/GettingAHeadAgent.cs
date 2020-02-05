@@ -58,7 +58,8 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		_bodyManager.OnAgentAction(vectorAction, textAction);
 
 		// manage reward
-        float velocity = Mathf.Clamp(_bodyManager.GetNormalizedVelocity().x, 0f, 1f);
+        float velocity =_bodyManager.GetNormalizedVelocity().x;
+		velocity =  Mathf.Clamp(velocity, -1f, 1f);
 		var actionDifference = _bodyManager.GetActionDifference();
 		var actionsAbsolute = vectorAction.Select(x=>Mathf.Abs(x)).ToList();
 		var actionsAtLimit = actionsAbsolute.Select(x=> x>=1f ? 1f : 0f).ToList();
@@ -88,22 +89,33 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 		var jumpReward = 0f;
 		if (!anySensorInTouch)
 		{
-			jumpReward += 1f;
 			jumpReward += footHeight;
 		}
 
+		float stationaryVelocityReward = 1f-velocity;
 		if (goalStationary)
 		{
 			velocity = Mathf.Abs(velocity);
 			velocity = Mathf.Pow(velocity, 3);
-			reward = 1f - velocity;
-			reward = Mathf.Clamp(reward, -1f, 1f);
+			float footReward = sensorsInTouch.Average();
+			// float actionDifferenceReward = 1f-actionDifference;
+			reward = 
+				footReward * .2f +
+				reducedPowerBonus * .3f +
+				stationaryVelocityReward * .5f;
 		}
 		else if (goalRight)
 			reward = velocity;
 		else
 			reward = -velocity;
-        if (Jump)
+        if (Jump && goalStationary)
+		{
+			reward = 
+				jumpReward * .5f +
+				reducedPowerBonus * .2f +
+				stationaryVelocityReward * .3f;
+		}
+		else if (Jump)
         {
 			reward = reward * .5f;
 			reward += (jumpReward * .5f);

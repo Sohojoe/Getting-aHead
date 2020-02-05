@@ -143,6 +143,7 @@ public class BodyManager002 : MonoBehaviour, IOnSensorCollision
 			}
 			if (!DebugDisableMotor)
 				muscle.UpdateMotor();
+			lastVectorAction[i-1] = vectorAction[i-1];
 		}
 
         if (ShowMonitor)
@@ -389,10 +390,19 @@ public class BodyManager002 : MonoBehaviour, IOnSensorCollision
 
     public Vector3 GetNormalizedVelocity()
     {
-        var pelvis = GetFirstBodyPart(BodyPartGroup.Hips); 
-		if (pelvis == null)
-			pelvis = GetFirstBodyPart(BodyPartGroup.Torso); 
-        Vector3 metersPerSecond = pelvis.Rigidbody.velocity;
+        // var pelvis = GetFirstBodyPart(BodyPartGroup.Hips); 
+		// if (pelvis == null)
+		// 	pelvis = GetFirstBodyPart(BodyPartGroup.Torso); 
+        // Vector3 metersPerSecond = pelvis.Rigidbody.velocity;
+		var totalMass = BodyParts.Select(x=>x.Rigidbody.mass).Sum();
+		var velocityTimeMass = BodyParts
+			.Select(x=>x.Rigidbody.velocity * x.Rigidbody.mass);
+		var totalVelocityTimeMass = new Vector3(
+			velocityTimeMass.Select(x=>x.x).Sum(),
+			velocityTimeMass.Select(x=>x.y).Sum(),
+			velocityTimeMass.Select(x=>x.z).Sum()
+		);
+		var metersPerSecond = totalVelocityTimeMass / totalMass; 
         var n = GetNormalizedVelocity(metersPerSecond);
         return n;
     }
