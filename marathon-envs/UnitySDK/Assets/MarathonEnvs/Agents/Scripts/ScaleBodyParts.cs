@@ -11,9 +11,10 @@ public class ScaleBodyParts : MonoBehaviour, IOnHandleModelReset
     public float[] LimbScale;
 
     float[] _capsuleHeights;
-    //float[] _capsuleRadius;
     float[] _yPositions;
     float[] _masses;
+    Dictionary<string, Vector3> _configurableJointAnchors;
+    Dictionary<string, Vector3> _configurableJointConnectedAnchors;
 
     public void OnHandleModelReset()
     {
@@ -29,14 +30,12 @@ public class ScaleBodyParts : MonoBehaviour, IOnHandleModelReset
                 return 0f;
             return capsuleCollider.height;
         }).ToArray();
-        //_capsuleRadius = LimbsToScale.Select(x => {
-        //    CapsuleCollider capsuleCollider = x as CapsuleCollider;
-        //    if (x == null)
-        //        return 0f;
-        //    return capsuleCollider.radius;
-        //}).ToArray();
         _yPositions = LimbsToScale.Select(x => x.transform.position.y).ToArray();
         _masses = LimbsToScale.Select(x => x.GetComponent<Rigidbody>().mass).ToArray();
+        _configurableJointAnchors = GetComponentsInChildren<ConfigurableJoint>()
+            .ToDictionary(x=>x.name, x=>x.anchor);
+        _configurableJointConnectedAnchors = GetComponentsInChildren<ConfigurableJoint>()
+            .ToDictionary(x => x.name, x => x.connectedAnchor);
 
     }
 
@@ -62,21 +61,30 @@ public class ScaleBodyParts : MonoBehaviour, IOnHandleModelReset
                 Vector3 v = ColliderDirectionToVector(capsuleCollider.direction);
                 obj.transform.position += v * yOffset;
                 if (configurableJoint != null)
-                    configurableJoint.anchor += v * -yOffset;
+                {
+                    var anchor = _configurableJointAnchors[configurableJoint.name];
+                    anchor += v * -yOffset;
+                    configurableJoint.anchor = anchor;
+                }
                 var children = obj.GetComponentsInChildren<Transform>()
                     .Where(x => x.parent == obj.transform);
                 foreach (var childTransform in children)
                 {
-                    childTransform.position = new Vector3(
-                        childTransform.position.x,
-                        childTransform.position.y + yOffset,
-                        childTransform.position.z);
 
+                    var localV = childTransform.InverseTransformDirection(v);
+                    ConfigurableJoint childConfigurableJoint = childTransform.GetComponent<ConfigurableJoint>();
+                    if (childConfigurableJoint != null)
+                    {
+                        childConfigurableJoint.autoConfigureConnectedAnchor = false;
+                        var connectedAnchor = _configurableJointConnectedAnchors[childConfigurableJoint.name];
+                        connectedAnchor += v * yOffset;
+                        childConfigurableJoint.connectedAnchor = connectedAnchor;
+                    }
                 }
                 if (proceduralCapsule != null)
                 {
-                    proceduralCapsule.height = capsuleCollider.height;
-                    proceduralCapsule.radius = capsuleCollider.radius;
+                    proceduralCapsule.height = capsuleCollider.height * .90f;
+                    proceduralCapsule.radius = capsuleCollider.radius * .90f;
                     proceduralCapsule.CreateMesh();
                 }
 
