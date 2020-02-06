@@ -266,6 +266,11 @@ public class BodyManager002 : MonoBehaviour, IOnSensorCollision
 				transformsRotation[child.gameObject] = child.rotation;
 			}
 		}
+		var toCallOnReset = gameObject.GetComponents<IOnHandleModelReset>();
+        foreach (var item in toCallOnReset)
+        {
+			item.OnHandleModelReset();
+        }
 	}
 
 	public float GetHeightNormalizedReward(float maxHeight)
