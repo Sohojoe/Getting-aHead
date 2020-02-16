@@ -45,6 +45,8 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 
         AddVectorObs(MoveLeft);
         AddVectorObs(MoveRight);
+		bool stand = MoveRight == MoveLeft ? true : false;
+        AddVectorObs(stand);
         AddVectorObs(Jump);
 
         _bodyManager.OnCollectObservationsHandleDebug(GetInfo());
@@ -100,8 +102,9 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 			// float actionDifferenceReward = 1f-actionDifference;
 			reward = 
 				footReward * .2f +
-				reducedPowerBonus * .3f +
-				stationaryVelocityReward * .5f;
+				reducedPowerBonus * .2f +
+				notAtLimitBonus * .2f +
+				stationaryVelocityReward * .4f;
 		}
 		else if (goalRight)
 			reward = velocity;
@@ -109,9 +112,13 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
 			reward = -velocity;
         if (Jump && goalStationary)
 		{
+			reducedPowerBonus = Mathf.Clamp(reducedPowerBonus, 0f, jumpReward);
+			notAtLimitBonus = Mathf.Clamp(notAtLimitBonus, 0f, jumpReward);
+			stationaryVelocityReward = Mathf.Clamp(stationaryVelocityReward, 0f, jumpReward);
 			reward = 
-				jumpReward * .5f +
+				jumpReward * .3f +
 				reducedPowerBonus * .2f +
+				notAtLimitBonus * .2f +
 				stationaryVelocityReward * .3f;
 		}
 		else if (Jump)
@@ -217,5 +224,7 @@ public class GettingAHeadAgent : Agent, IOnTerrainCollision
         }
 		MoveRight = true ? action == 1 : false;
 		MoveLeft = true ? action == 2 : false;
+		// MoveRight = false; // HACK
+		// MoveLeft = false; // HACK
     }
 }

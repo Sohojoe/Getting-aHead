@@ -131,19 +131,21 @@ public class BodyManager002 : MonoBehaviour, IOnSensorCollision
 			// 	continue;
 			if (muscle.ConfigurableJoint.angularXMotion != ConfigurableJointMotion.Locked){
 				vectorDifference[i] = Mathf.Abs(vectorAction[i]-lastVectorAction[i]);
+				lastVectorAction[i] = vectorAction[i];
 				muscle.TargetNormalizedRotationX = vectorAction[i++];
 			}
 			if (muscle.ConfigurableJoint.angularYMotion != ConfigurableJointMotion.Locked){
 				vectorDifference[i] = Mathf.Abs(vectorAction[i]-lastVectorAction[i]);
+				lastVectorAction[i] = vectorAction[i];
 				muscle.TargetNormalizedRotationY = vectorAction[i++];
 			}
 			if (muscle.ConfigurableJoint.angularZMotion != ConfigurableJointMotion.Locked){
 				vectorDifference[i] = Mathf.Abs(vectorAction[i]-lastVectorAction[i]);
+				lastVectorAction[i] = vectorAction[i];
 				muscle.TargetNormalizedRotationZ = vectorAction[i++];
 			}
 			if (!DebugDisableMotor)
 				muscle.UpdateMotor();
-			lastVectorAction[i-1] = vectorAction[i-1];
 		}
 
         if (ShowMonitor)
